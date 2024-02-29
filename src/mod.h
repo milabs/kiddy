@@ -39,6 +39,10 @@
 #endif
 
 static inline int kiddy_do_filter(void) {
+	return !uid_eq(current_cred()->uid, GLOBAL_ROOT_UID);
+}
+
+static inline int kiddy_do_filter_tty(void) {
 	const void *tty = current->signal->tty; // no need to lock
 	return !uid_eq(current_cred()->uid, GLOBAL_ROOT_UID) || !tty;
 }
