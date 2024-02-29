@@ -1,0 +1,34 @@
+# default preset, feel free to modify
+
+empty :=
+space := $(empty) $(empty)
+linuxVersion := $(subst .,$(space),$(shell uname -r))
+
+KIDDY_UTS_RELEASE := $(word 1,$(linuxVersion)).$(word 2,$(linuxVersion))-kiddy
+ccflags-y += -DKIDDY_UTS_RELEASE='"$(KIDDY_UTS_RELEASE)"'
+
+KIDDY_UTS_VERSION := \#1-Linux $(shell date -u)
+ccflags-y += -DKIDDY_UTS_VERSION='"$(KIDDY_UTS_VERSION)"'
+
+KIDDY_PROC_CMDLINE := kiddy quiet ro
+ccflags-y += -DKIDDY_PROC_CMDLINE='"$(KIDDY_PROC_CMDLINE)"'
+
+KIDDY_PROC_VERSION := Linux version $(KIDDY_UTS_RELEASE) $(KIDDY_UTS_VERSION)
+ccflags-y += -DKIDDY_PROC_VERSION='"$(KIDDY_PROC_VERSION)"'
+
+KIDDY_LINUX_VERSION_CODE := $(shell printf "0x%08x" $$(( $(word 1,$(linuxVersion)) * 256 * 256 + $(word 2,$(linuxVersion)) * 256 )) )
+ccflags-y += -DKIDDY_LINUX_VERSION_CODE=$(KIDDY_LINUX_VERSION_CODE)
+
+KIDDY_RESTRICT_INODES += /boot
+KIDDY_RESTRICT_INODES += /lib/modules
+KIDDY_RESTRICT_INODES += /proc/modules
+KIDDY_RESTRICT_INODES += /proc/kallsyms
+KIDDY_RESTRICT_INODES += /proc/config.gz
+KIDDY_RESTRICT_INODES += /var/log
+KIDDY_RESTRICT_INODES += /var/lib/yum
+KIDDY_RESTRICT_INODES += /var/lib/rpm
+KIDDY_RESTRICT_INODES += /var/cache/yum
+KIDDY_RESTRICT_INODES += /var/cache/rpm
+KIDDY_RESTRICT_INODES += /usr/src/kernels
+KIDDY_RESTRICT_INODES := $(subst $(space),:,$(KIDDY_RESTRICT_INODES))
+ccflags-y += -DKIDDY_RESTRICT_INODES='"$(KIDDY_RESTRICT_INODES)"'
