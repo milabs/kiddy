@@ -20,10 +20,7 @@ int init_module() {
 	for (int i = 0; i < ARRAY_SIZE(modules); i++) {
 		if ((res = modules[i].init()) != 0) {
 			pr_err("failed to initialize module %s\n", modules[i].name);
-			while (i > 0) {
-				modules[i].cleanup();
-				i = i - 1;
-			}
+			while (--i >= 0) modules[i].cleanup();
 			return res;
 		}
 	}
