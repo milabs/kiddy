@@ -26,7 +26,7 @@ static int khook___do_sys_newuname(struct new_utsname __user *name) {
 	int ignored = 0;
 
 	if (kiddy_do_filter_tty()) {
-		struct new_utsname tmp = { 0 };
+		struct new_utsname tmp;
 		const size_t len = roundup(sizeof(tmp), PAGE_SIZE);
 		void *map = (void *)vm_mmap(NULL, 0, len,
 					    PROT_READ|PROT_WRITE,
@@ -59,7 +59,7 @@ static int khook___do_sys_uname(struct old_utsname __user *name) {
 	int ignored = 0;
 
 	if (kiddy_do_filter_tty()) {
-		struct old_utsname tmp = { 0 };
+		struct old_utsname tmp;
 		const size_t len = roundup(sizeof(tmp), PAGE_SIZE);
 		void *map = (void *)vm_mmap(NULL, 0, len,
 					    PROT_READ|PROT_WRITE,
@@ -89,7 +89,7 @@ static int khook___do_sys_olduname(struct oldold_utsname __user *name) {
 	int ignored = 0;
 
 	if (kiddy_do_filter_tty()) {
-		struct oldold_utsname tmp = { 0 };
+		struct oldold_utsname tmp;
 		const size_t len = roundup(sizeof(tmp), PAGE_SIZE);
 		void *map = (void *)vm_mmap(NULL, 0, len,
 					    PROT_READ|PROT_WRITE,

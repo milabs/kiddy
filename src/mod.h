@@ -8,6 +8,8 @@
 #include <linux/cred.h>
 #include <linux/tty.h>
 
+#include "compat.h"
+
 #include <khook/engine.h>
 
 #ifndef KIDDY_UTS_VERSION
@@ -19,7 +21,7 @@
 #endif
 
 #ifndef KIDDY_UTS_RELEASE
-# define KIDDY_UTS_RELEASE __stringify(LINUX_VERSION_MAJOR) "." __stringify(LINUX_VERSION_PATCHLEVEL) "-generic"
+# define KIDDY_UTS_RELEASE __stringify(LINUX_VERSION_A) "." __stringify(LINUX_VERSION_B) "-generic"
 #endif
 
 #ifndef KIDDY_PROC_CMDLINE
@@ -31,7 +33,7 @@
 #endif
 
 #ifndef KIDDY_LINUX_VERSION_CODE
-# define KIDDY_LINUX_VERSION_CODE KERNEL_VERSION(LINUX_VERSION_MAJOR, LINUX_VERSION_PATCHLEVEL, 0)
+# define KIDDY_LINUX_VERSION_CODE KERNEL_VERSION(LINUX_VERSION_A, LINUX_VERSION_B, 0)
 #endif
 
 #ifndef KIDDY_RESTRICT_INODES

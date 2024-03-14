@@ -96,6 +96,8 @@ The filtering decision is made as follows: filter data for all non-root processe
 sudo insmod kiddy.ko
 ~~~
 
+See [presets](presets/README.md) for details.
+
 # Limitations
 
 Doesn't help with `dirtycow`-like exploits.

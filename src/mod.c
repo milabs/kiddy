@@ -9,8 +9,17 @@ static struct {
 	{ "vdso", kiddy_init_vdso, kiddy_cleanup_vdso },
 	{ "uname", kiddy_init_uname, kiddy_cleanup_uname },
 	{ "syslog", kiddy_init_syslog, kiddy_cleanup_syslog },
-	{ "(khook)", (void *)khook_init, (void *)khook_cleanup }, // external
 };
+
+////////////////////////////////////////////////////////////////////////////////
+
+static unsigned long kiddy_lookup(const char *name) {
+	unsigned long addr = khook_lookup_name(name);
+	if (!addr && (strstr(name, "__do_sys") == name)) {
+		addr = khook_lookup_name(name + 5); // __do_sys_xxx -> sys_xxx
+	}
+	return addr;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -25,10 +34,12 @@ int init_module() {
 		}
 	}
 
-	return 0;
+	return khook_init(kiddy_lookup);
 }
 
 void cleanup_module() {
+	khook_cleanup();
+
 	for (int i = 0; i < ARRAY_SIZE(modules); i++) {
 		modules[ARRAY_SIZE(modules) - i - 1].cleanup();
 	}

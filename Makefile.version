@@ -1,0 +1,9 @@
+# linux version extractor
+
+empty		:=
+space		:= $(empty) $(empty)
+linuxVersion	:= $(subst .,$(space),$(shell uname -r))
+
+linuxVersionA	:= $(word 1,$(linuxVersion))
+linuxVersionB	:= $(word 2,$(linuxVersion))
+linuxVersionC	:= $(word 3,$(linuxVersion))

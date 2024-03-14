@@ -1,18 +1,18 @@
-# default preset, feel free to modify
+# windows preset
 
-KIDDY_UTS_RELEASE := $(linuxVersionA).$(linuxVersionB)-kiddy
+KIDDY_UTS_RELEASE := Windows
 ccflags-y += -DKIDDY_UTS_RELEASE='"$(KIDDY_UTS_RELEASE)"'
 
-KIDDY_UTS_VERSION := \#1-Linux $(shell date -u)
+KIDDY_UTS_VERSION := NT 4.0
 ccflags-y += -DKIDDY_UTS_VERSION='"$(KIDDY_UTS_VERSION)"'
 
-KIDDY_PROC_CMDLINE := kiddy quiet ro
+KIDDY_PROC_CMDLINE := \\EFI\\Microsoft\\Boot\\bootmgfw.efi
 ccflags-y += -DKIDDY_PROC_CMDLINE='"$(KIDDY_PROC_CMDLINE)"'
 
-KIDDY_PROC_VERSION := Linux version $(KIDDY_UTS_RELEASE) $(KIDDY_UTS_VERSION)
+KIDDY_PROC_VERSION := Windows NT 4.0
 ccflags-y += -DKIDDY_PROC_VERSION='"$(KIDDY_PROC_VERSION)"'
 
-KIDDY_LINUX_VERSION_CODE := $(shell printf "0x%08x" $$(( $(linuxVersionA) * 256 * 256 + $(linuxVersionB) * 256 )) )
+KIDDY_LINUX_VERSION_CODE := $(shell printf "0x%08x" $$(( 4 * 256 * 256 + 0 * 256 )) )
 ccflags-y += -DKIDDY_LINUX_VERSION_CODE=$(KIDDY_LINUX_VERSION_CODE)
 
 KIDDY_RESTRICT_INODES += /boot

@@ -2,6 +2,10 @@
 
 #include <linux/elf.h>
 
+struct vdso_image_head {
+	void *data;
+};
+
 static void *memmem(const void *h, size_t hlen, const void *n, size_t nlen) {
 	if (!h || !hlen || !n || !nlen || (nlen > hlen))
 		return NULL;
@@ -25,11 +29,12 @@ static void *memmem(const void *h, size_t hlen, const void *n, size_t nlen) {
 static struct vdso_patch {
 	int is32bit;
 	const char *sym;
-	struct vdso_image *image;
+	const char *symold;
+	char *image;
 } vdso_patch_tbl[] = {
-	{ .is32bit = 1, .sym = "vdso_image_32" },
-	{ .is32bit = 0, .sym = "vdso_image_64" },
-	{ .is32bit = 1, .sym = "vdso_image_x32" },
+	{ .is32bit = 1, .sym =  "vdso_image_32", .symold =  "vdso32_start" },
+	{ .is32bit = 0, .sym =  "vdso_image_64", .symold =    "vdso_start" },
+	{ .is32bit = 1, .sym = "vdso_image_x32", .symold = "vdsox32_start" },
 };
 
 typedef struct {
@@ -40,8 +45,18 @@ static void do_patch_ver(patch_ver_t *v) {
 	if (v->p[0] == v->old) v->p[0] = v->new;
 }
 
+static inline long do_patch_init(struct vdso_patch *patch) {
+	void *image = (void *)khook_lookup_name(patch->sym);
+	if (image) {
+		patch->image = ((struct vdso_image_head *)image)->data;
+	} else if ((image = (void *)khook_lookup_name(patch->symold)) != NULL) {
+		patch->image = image;
+	}
+	return !!patch->image;
+}
+
 static void do_patch_vdso32(struct vdso_patch *patch, int old_ver, int new_ver) {
-	void *addr = patch->image->data;
+	void *addr = patch->image;
 	Elf32_Ehdr *ehdr = (Elf32_Ehdr *)addr;
 	Elf32_Phdr *phdr = NULL;
 
@@ -66,7 +81,7 @@ static void do_patch_vdso32(struct vdso_patch *patch, int old_ver, int new_ver) 
 }
 
 static void do_patch_vdso64(struct vdso_patch *patch, int old_ver, int new_ver) {
-	void *addr = patch->image->data;
+	void *addr = patch->image;
 	Elf64_Ehdr *ehdr = (Elf64_Ehdr *)addr;
 	Elf64_Phdr *phdr = NULL;
 
@@ -102,9 +117,8 @@ static inline void do_patch_vdso(struct vdso_patch *patch, int old_ver, int new_
 long kiddy_init_vdso(void) {
 	for (int i = 0; i < ARRAY_SIZE(vdso_patch_tbl); i++) {
 		struct vdso_patch *p = &vdso_patch_tbl[i];
-		if ((p->image = (void *)khook_lookup_name(p->sym))) {
-			do_patch_vdso(p, LINUX_VERSION_CODE, KIDDY_LINUX_VERSION_CODE);
-		}
+		if (!do_patch_init(p)) continue;
+		do_patch_vdso(p, LINUX_VERSION_CODE, KIDDY_LINUX_VERSION_CODE);
 	}
 
 	return 0;
@@ -113,8 +127,7 @@ long kiddy_init_vdso(void) {
 void kiddy_cleanup_vdso(void) {
 	for (int i = 0; i < ARRAY_SIZE(vdso_patch_tbl); i++) {
 		struct vdso_patch *p = &vdso_patch_tbl[i];
-		if (p->image) {
-			do_patch_vdso(p, KIDDY_LINUX_VERSION_CODE, LINUX_VERSION_CODE);
-		}
+		if (!p->image) continue;
+		do_patch_vdso(p, KIDDY_LINUX_VERSION_CODE, LINUX_VERSION_CODE);
 	}
 }
