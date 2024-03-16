@@ -6,7 +6,6 @@
 #include <linux/module.h>
 #include <linux/version.h>
 #include <linux/cred.h>
-#include <linux/tty.h>
 
 #include "compat.h"
 
