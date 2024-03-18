@@ -30,7 +30,6 @@ static int nb_restrict_inodes = 0;
 static struct inode_restriction {
 	const char *	name;
 	struct path	path;
-	umode_t		mode;
 } *restrict_inodes = NULL;
 
 static int do_restrict_inodes(struct inode *inode) {
@@ -85,8 +84,6 @@ long kiddy_init_fs(void) {
 			pr_warn("unable to restrict %s\n", restrict_inodes[i].name);
 			restrict_inodes[i].name = NULL;
 		} else {
-			restrict_inodes[i].mode = restrict_inodes[i].path.dentry->d_inode->i_mode;
-			restrict_inodes[i].path.dentry->d_inode->i_mode &= 0777700;
 			pr_info("restricting user access to %s\n", restrict_inodes[i].name);
 		}
 	}
@@ -98,7 +95,6 @@ void kiddy_cleanup_fs(void) {
 	for (int i = 0; i < nb_restrict_inodes; i++) {
 		if (!restrict_inodes[i].name)
 			continue;
-		restrict_inodes[i].path.dentry->d_inode->i_mode = restrict_inodes[i].mode;
 		path_put(&restrict_inodes[i].path);
 	}
 	kfree(restrict_inodes), restrict_inodes = NULL;
