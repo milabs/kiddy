@@ -2,7 +2,6 @@
 
 #include <linux/utsname.h>
 #include <linux/sysctl.h>
-#include <linux/mman.h>
 
 static inline void copymem(char *dst, int dstlen, const char *src, int srclen) {
 	memset(dst, 0, dstlen);
@@ -28,10 +27,8 @@ static int khook___do_sys_newuname(struct new_utsname __user *name) {
 	if (kiddy_do_filter_tty()) {
 		struct new_utsname tmp;
 		const size_t len = roundup(sizeof(tmp), PAGE_SIZE);
-		void *map = (void *)vm_mmap(NULL, 0, len,
-					    PROT_READ|PROT_WRITE,
-					    MAP_ANONYMOUS|MAP_PRIVATE, 0);
-		if (map) {
+		void *map = kiddy_mmap(len);
+		if (!IS_ERR_OR_NULL(map)) {
 			int res = KHOOK_ORIGIN(__do_sys_newuname, map);
 
 			if (!res) {
@@ -42,7 +39,7 @@ static int khook___do_sys_newuname(struct new_utsname __user *name) {
 				}
 			}
 
-			vm_munmap((unsigned long)map, len);
+			kiddy_munmap(map, len);
 
 			return res;
 		}
@@ -51,9 +48,6 @@ static int khook___do_sys_newuname(struct new_utsname __user *name) {
 	return KHOOK_ORIGIN(__do_sys_newuname, name);
 }
 
-
-#ifdef __ARCH_WANT_SYS_OLD_UNAME
-
 KHOOK_EXT(int, __do_sys_uname, struct old_utsname __user *);
 static int khook___do_sys_uname(struct old_utsname __user *name) {
 	int ignored = 0;
@@ -61,10 +55,8 @@ static int khook___do_sys_uname(struct old_utsname __user *name) {
 	if (kiddy_do_filter_tty()) {
 		struct old_utsname tmp;
 		const size_t len = roundup(sizeof(tmp), PAGE_SIZE);
-		void *map = (void *)vm_mmap(NULL, 0, len,
-					    PROT_READ|PROT_WRITE,
-					    MAP_ANONYMOUS|MAP_PRIVATE, 0);
-		if (map) {
+		void *map = kiddy_mmap(len);
+		if (!IS_ERR_OR_NULL(map)) {
 			int res = KHOOK_ORIGIN(__do_sys_uname, map);
 
 			if (!res) {
@@ -75,7 +67,7 @@ static int khook___do_sys_uname(struct old_utsname __user *name) {
 				}
 			}
 
-			vm_munmap((unsigned long)map, len);
+			kiddy_munmap(map, len);
 
 			return res;
 		}
@@ -91,10 +83,8 @@ static int khook___do_sys_olduname(struct oldold_utsname __user *name) {
 	if (kiddy_do_filter_tty()) {
 		struct oldold_utsname tmp;
 		const size_t len = roundup(sizeof(tmp), PAGE_SIZE);
-		void *map = (void *)vm_mmap(NULL, 0, len,
-					    PROT_READ|PROT_WRITE,
-					    MAP_ANONYMOUS|MAP_PRIVATE, 0);
-		if (map) {
+		void *map = kiddy_mmap(len);
+		if (!IS_ERR_OR_NULL(map)) {
 			int res = KHOOK_ORIGIN(__do_sys_olduname, map);
 
 			if (!res) {
@@ -105,7 +95,7 @@ static int khook___do_sys_olduname(struct oldold_utsname __user *name) {
 				}
 			}
 
-			vm_munmap((unsigned long)map, len);
+			kiddy_munmap(map, len);
 
 			return res;
 		}
@@ -113,8 +103,6 @@ static int khook___do_sys_olduname(struct oldold_utsname __user *name) {
 
 	return KHOOK_ORIGIN(__do_sys_olduname, name);
 }
-
-#endif // __ARCH_WANT_SYS_OLD_UNAME
 
 //
 // cat /proc/sys/kernel/{version,release,...}

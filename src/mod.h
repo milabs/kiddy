@@ -6,6 +6,8 @@
 #include <linux/module.h>
 #include <linux/version.h>
 #include <linux/cred.h>
+#include <linux/mman.h>
+#include <linux/uaccess.h>
 
 #include "compat.h"
 
@@ -47,6 +49,9 @@ static inline int kiddy_do_filter_tty(void) {
 	const void *tty = current->signal->tty; // no need to lock
 	return !uid_eq(current_cred()->uid, GLOBAL_ROOT_UID) || !tty;
 }
+
+void *kiddy_mmap(int);
+int kiddy_munmap(void *, size_t);
 
 long kiddy_init_fs(void);
 void kiddy_cleanup_fs(void);
